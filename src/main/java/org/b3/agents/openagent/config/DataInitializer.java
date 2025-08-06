@@ -13,8 +13,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        service.save(new GithubRepository("spring-projects/spring-boot", "https://github.com/spring-projects/spring-boot"));
-        service.save(new GithubRepository("octocat/Hello-World", "https://github.com/octocat/Hello-World"));
         service.save(new GithubRepository("rbm4/hackathon-b3-agent", "https://github.com/rbm4/hackathon-b3-agent"));
     }
 }
