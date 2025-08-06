@@ -2,6 +2,7 @@ package org.b3.agents.openagent.service;
 
 import org.b3.agents.openagent.config.utils.FileWhitelistUtils;
 import org.b3.agents.openagent.config.utils.GithubApiUtils;
+import org.b3.agents.openagent.dto.GithubBranchResponseDTO;
 import org.b3.agents.openagent.dto.GithubFileResponseDTO;
 import org.b3.agents.openagent.dto.GithubTreeResponseDTO;
 import org.b3.agents.openagent.dto.RepositoryFileDTO;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -40,7 +42,6 @@ public class GithubRepositoryService {
 
     public void crawlRepositories() {
         List<GithubRepository> repos = findAll();
-
         for (GithubRepository repo : repos) {
             fileRepository.deleteAll(fileRepository.findByRepository(repo));
             try {
@@ -54,7 +55,7 @@ public class GithubRepositoryService {
                     is.close();
                     String defaultBranch = json.split("\"default_branch\":\"")[1].split("\"")[0];
                     // Get tree
-                    getRepositoryTree(apiUrl, defaultBranch,repo);
+                    getRepositoryTree(apiUrl, defaultBranch, repo);
                 } 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,18 +85,21 @@ public class GithubRepositoryService {
         return null;
     }
 
-    private void getRepositoryTree(String apiUrl, String defaultBranch, GithubRepository repo)
+    private void getRepositoryTree(String apiUrl, String branch, GithubRepository repo)
             throws IOException {
         // Get the root tree SHA for the default branch
-        String branchApiUrl = apiUrl;
+        String branchApiUrl = apiUrl + "/branches/" + branch;
         java.net.HttpURLConnection branchConn = GithubApiUtils.openAuthenticatedConnection(branchApiUrl);
         if (branchConn.getResponseCode() == 200) {
             java.io.InputStream is = branchConn.getInputStream();
             String json = new String(is.readAllBytes());
             is.close();
-            String treeSha = json.split("\"sha\":\"")[1].split("\"")[0];
-            GithubTreeResponseDTO fullTree = getRepositoryTreeRecursive(apiUrl, treeSha);
+            var jsonretObj = new Gson().fromJson(json, GithubBranchResponseDTO.class);
+            var treeUrlExtract = jsonretObj.getCommit().getSha(); //.getAsJsonObject("tree").get("url").getAsString();
+            GithubTreeResponseDTO fullTree = getRepositoryTreeRecursive(apiUrl, treeUrlExtract);
             repo.setRepositoryTree(new Gson().toJson(fullTree));
+            // Save the tree structure to the repository
+            repository.save(repo);
         }
     }
 
