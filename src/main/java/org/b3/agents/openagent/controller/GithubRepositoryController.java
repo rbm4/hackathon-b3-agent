@@ -1,6 +1,8 @@
 package org.b3.agents.openagent.controller;
 
+import org.b3.agents.openagent.dto.RepositoryFileDTO;
 import org.b3.agents.openagent.model.GithubRepository;
+import org.b3.agents.openagent.model.RepositoryFile;
 import org.b3.agents.openagent.service.GithubRepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +31,10 @@ public class GithubRepositoryController {
     @GetMapping
     public ResponseEntity<List<GithubRepository>> getAllRepositories() {
         return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/files")
+    public ResponseEntity<List<RepositoryFileDTO>> getAllFiles() {
+        return ResponseEntity.ok(service.findAllFiles());
     }
 }
