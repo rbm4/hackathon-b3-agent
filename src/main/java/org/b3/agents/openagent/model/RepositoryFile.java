@@ -30,8 +30,7 @@ public class RepositoryFile {
     
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "repository_id")
-    @JsonIgnore
+    @JoinColumn(updatable = false, name = "repository_id")
     private GithubRepository repository;
 
     public RepositoryFileDTO toDTO() {

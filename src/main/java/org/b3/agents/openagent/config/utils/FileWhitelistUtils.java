@@ -12,20 +12,30 @@ public class FileWhitelistUtils {
     public static boolean isCodeFile(String fileName, RepositoryFile file) {
         int dot = fileName.lastIndexOf('.');
         if (dot == -1) return false;
-        String ext = fileName.substring(dot + 1).toLowerCase();
+        String ext = fileName.substring(dot).toLowerCase();
         file.setExtension(ext);
-        return isBackendFile(ext,file) || isFrontendFile(ext,file) || isMarkupFile(ext,file);
+        if (isBackendFile(ext,file)){
+            file.setFileType("backend");
+            return true;
+        } else if (isFrontendFile(ext,file)) {
+            file.setFileType("frontend");
+            return true;
+        } else if (isMarkupFile(ext,file)){
+            file.setFileType("markup");
+            return true;
+        }
+        return false;
     }
     public static boolean isBackendFile(String ext, RepositoryFile file) {
-        file.setFileType("backend");
+        
         return backendSet.contains(ext.toLowerCase());
     }
     public static boolean isFrontendFile(String ext, RepositoryFile file) {
-        file.setFileType("frontend");
+        
         return frontendSet.contains(ext.toLowerCase());
     }
     public static boolean isMarkupFile(String ext, RepositoryFile file) {
-        file.setFileType("markup");
+        
         return markupSet.contains(ext.toLowerCase());
     }
 }

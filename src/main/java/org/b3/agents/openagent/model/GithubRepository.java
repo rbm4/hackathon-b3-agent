@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Entity
@@ -24,12 +25,22 @@ public class GithubRepository {
     // Reference to RepositoryFile class
     // Assuming a repository can have multiple files
     // and RepositoryFile is another @Entity class
+    @Transient
+    private String defaultBranch;
 
     public GithubRepository() {}
 
     public GithubRepository(String name, String url) {
         this.name = name;
         this.url = url;
+    }
+
+    public void setDefaultBranch(String defaultBranch) {
+        this.defaultBranch = defaultBranch;
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
     }
 
 }
