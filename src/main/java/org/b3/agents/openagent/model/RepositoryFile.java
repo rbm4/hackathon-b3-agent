@@ -15,8 +15,8 @@ import lombok.Setter;
 public class RepositoryFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long size;
     private Long id;
+    private Long size;
 
     private String fileName;
     private String filePath;
@@ -30,7 +30,7 @@ public class RepositoryFile {
     
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(updatable = false, name = "repository_id")
+    @JoinColumn(name = "repository_id")
     private GithubRepository repository;
 
     public RepositoryFileDTO toDTO() {

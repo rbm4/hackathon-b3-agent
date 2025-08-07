@@ -12,7 +12,6 @@ public class GithubTreeResponseDTO {
     
     @Data
     public static class TreeEntry {
-        private RepositoryFile file;
         private String path;
         private String mode;
         private String type; // "tree" or "blob"

@@ -87,8 +87,7 @@ public class GithubRepositoryService {
                     if ("blob".equals(entry.getType())) {
                         // Fetch file content for blobs
                         //getFilesContentJson(entry.getUrl(), repo.getDefaultBranch(), entry.getPath(), repo);
-                        var file = getBlobContent(entry.getUrl(), repo, entry.getPath());
-                        entry.setFile(file);
+                        getBlobContent(entry.getUrl(), repo, entry.getPath());
                     }
                 }
             }
@@ -113,15 +112,10 @@ public class GithubRepositoryService {
             // Save the tree structure to the repository
             repository.save(repo);
             // Save files to the database
-            for (GithubTreeResponseDTO.TreeEntry entry : fullTree.getTree()) {
-                if (entry.getFile() != null) {
-                    fileRepository.save(entry.getFile());
-                }
-            }
         }
     }
 
-    private RepositoryFile getBlobContent(String url, GithubRepository repo, String fileName) throws IOException {
+    private void getBlobContent(String url, GithubRepository repo, String fileName) throws IOException {
         var contentConn = GithubApiUtils.openAuthenticatedConnection(url);
         if (contentConn.getResponseCode() == 200) {
             InputStream contentIs = contentConn.getInputStream();
@@ -133,15 +127,14 @@ public class GithubRepositoryService {
             var fileEntity = fileRepository.findByRepositoryAndFilePath(repo, fileName).orElse(new RepositoryFile());
             contentIs.close();
             if (!FileWhitelistUtils.isCodeFile(fileName, fileEntity)) {
-                return null; 
+                return; 
             }
             fileEntity.setContent(fileContent);
             fileEntity.setFileName(fileName);
             fileEntity.setRepository(repo);
             fileEntity.setSize(blob.getSize());
-            return fileEntity;
+            fileRepository.save(fileEntity);
         }
-        return null;
     }
 
     private void getFilesContentJson(String apiUrl, String defaultBranch, String path, GithubRepository repo)
