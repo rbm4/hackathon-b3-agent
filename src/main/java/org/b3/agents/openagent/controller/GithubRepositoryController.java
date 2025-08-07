@@ -1,5 +1,6 @@
 package org.b3.agents.openagent.controller;
 
+import org.b3.agents.openagent.dto.FileDocumentationDTO;
 import org.b3.agents.openagent.dto.RepositoryFileDTO;
 import org.b3.agents.openagent.model.GithubRepository;
 import org.b3.agents.openagent.model.RepositoryFile;
@@ -36,5 +37,11 @@ public class GithubRepositoryController {
     @GetMapping("/files")
     public ResponseEntity<List<RepositoryFileDTO>> getAllFiles() {
         return ResponseEntity.ok(service.findAllFiles());
+    }
+
+    @GetMapping("/genDoc")
+    public ResponseEntity<List<FileDocumentationDTO>> generateDocumentation() {
+        var documentation = service.generateDocumentation();
+        return ResponseEntity.ok(documentation);
     }
 }

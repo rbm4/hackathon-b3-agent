@@ -11,5 +11,6 @@ public class RepositoryFileDTO {
     private String language;
     private String fileType;
     private String extension;
+    private String documentation;
     private Long size;
 }
