@@ -4,17 +4,22 @@ import org.b3.agents.openagent.dto.RepositoryFileDTO;
 import org.b3.agents.openagent.model.GithubRepository;
 import org.b3.agents.openagent.model.RepositoryFile;
 import org.b3.agents.openagent.service.GithubRepositoryService;
+import org.b3.agents.openagent.service.OciGenerativeAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/github-repositories")
 public class GithubRepositoryController {
     @Autowired
     private GithubRepositoryService service;
+
+    @Autowired
+    private OciGenerativeAiService aiService;
 
     @GetMapping("/crawl")
     public ResponseEntity<String> crawlRepositories() {
@@ -36,5 +41,12 @@ public class GithubRepositoryController {
     @GetMapping("/files")
     public ResponseEntity<List<RepositoryFileDTO>> getAllFiles() {
         return ResponseEntity.ok(service.findAllFiles());
+    }
+
+    @GetMapping("/ai/test")
+    public ResponseEntity<String> testAiAgent() {
+        String sampleCode = "class HelloWorld{\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}";
+        String result = aiService.generateReadme(sampleCode);
+        return ResponseEntity.ok(result);
     }
 }
