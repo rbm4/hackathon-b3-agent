@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import ch.qos.logback.core.util.StringUtil;
 import lombok.extern.log4j.Log4j2;
@@ -69,6 +70,11 @@ public class GithubRepositoryService {
                     repo.setDefaultBranch(defaultBranch);
                     // Get tree
                     getRepositoryTree(apiUrl, defaultBranch, repo);
+                } else {
+                    java.io.InputStream is = conn.getInputStream();
+                    String json = new String(is.readAllBytes());
+                    is.close();
+                    System.out.println(json);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -223,8 +229,62 @@ public class GithubRepositoryService {
         var documentationList = new ArrayList<FileDocumentationDTO>();
         for (RepositoryFile file : ret) {
             if (StringUtils.hasText(file.getDocumentation())) {
-                var json = new Gson().fromJson(file.getDocumentation(), FileDocumentationDTO.class);
-                documentationList.add(json);
+                try {
+                    var json = new Gson().fromJson(file.getDocumentation(), FileDocumentationDTO.class);
+                    documentationList.add(json);
+                } catch (JsonSyntaxException e) {
+                    log.error("Error parsing JSON for file: " + file.getFileName(), e);
+                    // Attempt to fix common JSON issues
+                    String fixed = file.getDocumentation().trim();
+
+                    fixed = fixed.replaceAll("\\s{2,}", " ");
+
+                    // Fix missing commas between key-value pairs
+                    // Pattern: "key":"value""key2":"value2" -> "key":"value","key2":"value2"
+                    fixed = fixed.replaceAll("\"\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "\",\"$1\":");
+
+                    // Fix missing commas between string values and next keys
+                    // Pattern: "value""key": -> "value","key":
+                    fixed = fixed.replaceAll("\"\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "\",\"$1\":");
+
+                    // Fix missing commas between numbers and next keys
+                    // Pattern: 123"key": -> 123,"key":
+                    fixed = fixed.replaceAll("(\\d)\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "$1,\"$2\":");
+
+                    // Fix missing commas between boolean values and next keys
+                    // Pattern: true"key": -> true,"key":
+                    fixed = fixed.replaceAll("(true|false)\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "$1,\"$2\":");
+
+                    // Fix missing commas between null values and next keys
+                    // Pattern: null"key": -> null,"key":
+                    fixed = fixed.replaceAll("(null)\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "$1,\"$2\":");
+
+                    // Fix missing commas between arrays and next keys
+                    // Pattern: ]"key": -> ],"key":
+                    fixed = fixed.replaceAll("\\]\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "],\"$1\":");
+
+                    // Fix missing commas between objects and next keys
+                    // Pattern: }"key": -> },"key":
+                    fixed = fixed.replaceAll("\\}\\s*\"([a-zA-Z_][a-zA-Z0-9_]*?)\"\\s*:", "},\"$1\":");
+
+                    // Fix missing commas between string values inside arrays: ["value" "value"] -> ["value","value"]
+                    fixed = fixed.replaceAll("\"\\s+\"", "\",\"");
+                    
+                    // Fix double commas that might have been introduced
+                    fixed = fixed.replaceAll(",,+", ",");
+
+                    // Fix comma after opening brace
+                    fixed = fixed.replaceAll("\\{\\s*,", "{");
+
+                    try {
+                        // Test if the fixed JSON is valid
+                        var json = new Gson().fromJson(fixed, FileDocumentationDTO.class);
+                        documentationList.add(json);
+                        log.info("Successfully fixed malformed JSON");
+                    } catch (JsonSyntaxException ex) {
+                        log.warn("Could not automatically fix JSON format, using original");
+                    }
+                }
             }
         }
         return documentationList;
