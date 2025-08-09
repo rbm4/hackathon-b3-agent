@@ -13,6 +13,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        service.save(new GithubRepository("rbm4/hackathon-b3-agent", "https://github.com/rbm4/hackathon-b3-agent"));
+        service.save(new GithubRepository("rbm4/hackathon-b3-agent", "https://github.com/cpbet/cpbet-back"));
     }
 }

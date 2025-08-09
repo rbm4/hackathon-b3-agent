@@ -1,5 +1,6 @@
 package org.b3.agents.openagent.controller;
 
+import org.b3.agents.openagent.dto.FileDocumentationDTO;
 import org.b3.agents.openagent.dto.RepositoryFileDTO;
 import org.b3.agents.openagent.model.GithubRepository;
 import org.b3.agents.openagent.model.RepositoryFile;
@@ -43,6 +44,13 @@ public class GithubRepositoryController {
         return ResponseEntity.ok(service.findAllFiles());
     }
 
+
+    @GetMapping("/genDoc")
+    public ResponseEntity<List<FileDocumentationDTO>> generateDocumentation() {
+        var documentation = service.generateDocumentation();
+        return ResponseEntity.ok(documentation);
+    }
+  
     @GetMapping("/ai/test")
     public ResponseEntity<String> testAiAgent() {
         String sampleCode = "class HelloWorld{\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}";

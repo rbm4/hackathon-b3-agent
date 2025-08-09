@@ -27,6 +27,8 @@ public class RepositoryFile {
     private String language;
     private String fileType; // e.g. frontend, backend, config, etc.
     private String extension;
+    @Lob
+    private String documentation;
     
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,6 +44,7 @@ public class RepositoryFile {
         dto.setLanguage(this.language);
         dto.setFileType(this.fileType);
         dto.setExtension(this.extension);
+        dto.setDocumentation(documentation);
         dto.setSize(this.size);
         return dto;
     }
