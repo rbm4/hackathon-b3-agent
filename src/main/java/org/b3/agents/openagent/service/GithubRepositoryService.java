@@ -45,6 +45,9 @@ public class GithubRepositoryService {
     @Autowired
     private RepositoryFileRepository fileRepository;
 
+    @Autowired
+    private OciGenerativeAiService ociService;
+
     public GithubRepository save(GithubRepository repo) {
         return repository.save(repo);
     }
@@ -56,7 +59,7 @@ public class GithubRepositoryService {
     public void crawlRepositories() {
         List<GithubRepository> repos = findAll();
         for (GithubRepository repo : repos) {
-            fileRepository.deleteAll(fileRepository.findByRepository(repo));
+            //fileRepository.deleteAll(fileRepository.findByRepository(repo));
             try {
                 String apiUrl = repo.getUrl().replace("https://github.com/", "https://api.github.com/repos/");
                 // Get default branch
@@ -186,7 +189,19 @@ public class GithubRepositoryService {
                         "- Use the exact structure provided below:\n");
         prompt.append(GithubApiUtils.JSON_FORMAT);
         prompt.append("\nRemember: Your entire response must be parseable as JSON. Nothing else.");
+        try {
+            log.info("Documenting file: " + file.getFileName());
+            var documentation = ociService.generateReadme(prompt.toString());
+            file.setDocumentation(documentation);
+            fileRepository.save(file);
+        } catch (Exception e) {
+            log.error("Error processing file through OCI: " + file.getFileName(), e);
+        }
+        //generatorWrapper(file, prompt);
 
+    }
+
+    private void generatorWrapper(RepositoryFile file, StringBuilder prompt) {
         try {
             java.net.URL url = new java.net.URL("https://ki6.com.br/hackathon_b3/documentacao");
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
@@ -198,7 +213,7 @@ public class GithubRepositoryService {
             try (java.io.OutputStream os = conn.getOutputStream()) {
                 os.write(new Gson().toJson(body).getBytes(StandardCharsets.UTF_8));
             }
-            System.out.println(body);
+            System.out.println("Envio do arquivo: " + file.getFileName());
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
                 try (InputStream is = conn.getInputStream()) {
@@ -214,7 +229,6 @@ public class GithubRepositoryService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
     }
 
     public List<RepositoryFileDTO> findAllFiles() {
