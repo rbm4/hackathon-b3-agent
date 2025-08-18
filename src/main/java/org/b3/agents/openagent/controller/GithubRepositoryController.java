@@ -45,9 +45,9 @@ public class GithubRepositoryController {
     }
 
 
-    @GetMapping("/genDoc")
-    public ResponseEntity<List<FileDocumentationDTO>> generateDocumentation() {
-        var documentation = service.generateDocumentation();
+    @GetMapping("/genDoc/{id}")
+    public ResponseEntity<List<FileDocumentationDTO>> generateDocumentation(@PathVariable("id") Long id) {
+        var documentation = service.generateDocumentation(id);
         return ResponseEntity.ok(documentation);
     }
   

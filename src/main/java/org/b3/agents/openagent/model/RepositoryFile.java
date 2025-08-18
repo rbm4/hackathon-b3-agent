@@ -1,6 +1,10 @@
 package org.b3.agents.openagent.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.b3.agents.openagent.dto.RepositoryFileDTO;
+import org.b3.agents.openagent.model.enums.RepositoryFileTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,8 +26,16 @@ public class RepositoryFile {
     private String filePath;
     @Lob
     private String content;
-
+    @Enumerated(EnumType.STRING)
+    private RepositoryFileTypeEnum type;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private RepositoryFile parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RepositoryFile> children = new ArrayList<>();
+
     private String language;
     private String fileType; // e.g. frontend, backend, config, etc.
     private String extension;

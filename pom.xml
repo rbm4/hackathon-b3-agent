@@ -75,18 +75,18 @@
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
 			<artifactId>oci-java-sdk-generativeaiinference</artifactId>
-			<version>3.47.0</version>
+			<version>3.70.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
 			<artifactId>oci-java-sdk-common</artifactId>
-			<version>3.47.0</version>
+			<version>3.70.1</version>
 		</dependency>
 		<!-- Required HTTP client for Oracle SDK -->
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
 			<artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
-			<version>3.47.0</version>
+			<version>3.70.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.glassfish.jersey.core</groupId>
